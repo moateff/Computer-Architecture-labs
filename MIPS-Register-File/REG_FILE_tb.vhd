@@ -18,14 +18,12 @@
 -- 
 ----------------------------------------------------------------------------------
 
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use std.textio.all;
 
 entity REG_FILE_TB is
-
 end REG_FILE_TB;
 
 architecture testbench of REG_FILE_TB is
@@ -60,7 +58,7 @@ begin
     -- Clock process
     clk_process: process
     begin
-        while now < 3000 ns loop  -- Limit simulation time
+        while now < 500 ns loop  -- Limit simulation time
             clk <= '0';
             wait for CLK_PERIOD / 2;
             clk <= '1';
@@ -77,7 +75,7 @@ begin
         -- Test Case 1: Write and Read from Register
         wr_en   <= '1';
         wr_addr <= "00001";
-        wr_data <= x"12341234";
+        wr_data <= x"DEADBEEF";
         wait for CLK_PERIOD / 2;
         wait for CLK_PERIOD;
         wr_en   <= '0';
@@ -119,9 +117,32 @@ begin
             report "Error: Incorrect data read from register 2!" severity error;
         assert rd_data2 = x"ABCDEF12"
             report "Error: Incorrect data read from register 3!" severity error;
-
+        
+        -- Test Case 4: Write and Read in the Same Clock Cycle
+        wr_en   <= '1';
+        wr_addr <= "00100";
+        wr_data <= x"A5A5A5A5";
+        rd_addr1 <= "00100";
+        wait for CLK_PERIOD;
+        wr_en   <= '0';
+        
+        assert rd_data1 = x"A5A5A5A5"
+            report "Error: Failed to read and write in the same cycle!" severity error;
+        
+        -- Test Case 5: RegWrite Disabled (wr_en = 0)
+        wr_en   <= '0';
+        wr_addr <= "00101";
+        wr_data <= x"BEEFCAFE";
+        wait for CLK_PERIOD;
+        
+        rd_addr1 <= "00101";
+        wait for CLK_PERIOD;
+        assert rd_data1 = x"00000000"
+            report "Error: Data should not be written when wr_en is '0'!" severity error;
+        
         report "Testbench Completed Successfully." severity note;
         wait;
     end process;
 
 end testbench;
+
