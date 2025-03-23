@@ -56,10 +56,10 @@ begin
     rd_data1 <= reg_memory(to_integer(unsigned(rd_addr1))) when rd_addr1 /= "00000" else (others => '0');
     rd_data2 <= reg_memory(to_integer(unsigned(rd_addr2))) when rd_addr2 /= "00000" else (others => '0');
 
-    -- Write logic: Updates register memory on falling edge of clk
+    -- Write logic: Updates register memory on rising edge of clk
     process (clk)
     begin
-        if falling_edge(clk) then
+        if rising_edge(clk) then
             if wr_en = '1' then
                 reg_memory(to_integer(unsigned(wr_addr))) <= wr_data;
             end if;
